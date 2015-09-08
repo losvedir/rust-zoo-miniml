@@ -395,6 +395,69 @@ fn run(frm: Frame, env: Environ) -> Result<Mvalue, String> {
 
 /////////////// end machine /////////////////////
 
+///////////// compile.ml ////////////////////
+
+// MiniML compiler Expr -> Instr
+fn compile(expr: Expr) -> Vec<Instr> {
+    match expr {
+        Expr::Var(x) => vec![Instr::Var(x)],
+        Expr::Int(k) => vec![Instr::Int(k)],
+        Expr::Bool(b) => vec![Instr::Bool(b)],
+        Expr::Times(e1, e2) => {
+            let mut instrs = compile(*e1);
+            instrs.extend(compile(*e2));
+            instrs.extend(vec![Instr::Mult]);
+            instrs
+        }
+        Expr::Plus(e1, e2) => {
+            let mut instrs = compile(*e1);
+            instrs.extend(compile(*e2));
+            instrs.extend(vec![Instr::Add]);
+            instrs
+        }
+        Expr::Minus(e1, e2) => {
+            let mut instrs = compile(*e1);
+            instrs.extend(compile(*e2));
+            instrs.extend(vec![Instr::Sub]);
+            instrs
+        }
+        Expr::Equal(e1, e2) => {
+            let mut instrs = compile(*e1);
+            instrs.extend(compile(*e2));
+            instrs.extend(vec![Instr::Equal]);
+            instrs
+        }
+        Expr::Less(e1, e2) => {
+            let mut instrs = compile(*e1);
+            instrs.extend(compile(*e2));
+            instrs.extend(vec![Instr::Less]);
+            instrs
+        }
+        Expr::If(e1, e2, e3) => {
+            let mut cond_instrs = compile(*e1);
+            let true_instrs = compile(*e2);
+            let false_instrs = compile(*e3);
+            cond_instrs.extend(vec![Instr::Branch(true_instrs, false_instrs)]);
+            cond_instrs
+        }
+        Expr::Fn(f, x, _, _, e) => {
+            let mut func_body = compile(*e);
+            func_body.extend(vec![Instr::PopEnv]);
+            vec![Instr::Closure((*f).to_string(), (*x).to_string(), func_body)]
+        }
+
+        Expr::Apply(e1, e2) => {
+            let mut instrs = compile(*e1);
+            instrs.extend(compile(*e2));
+            instrs.extend(vec![Instr::Call]);
+            instrs
+        }
+    }
+}
+
+
+////////////// end compile /////////////
+
 fn main() {
     let t: Type = Type::Arrow(
                               Box::new(Type::Arrow(Box::new(Type::Int),
