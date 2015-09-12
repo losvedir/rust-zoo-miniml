@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use std::fmt;
+use std::io;
+use std::io::Write;
 
 ////////// From syntax.ml /////////
 
@@ -204,7 +206,7 @@ fn type_of<'a, 'b>(ctx: &'a mut HashMap<Name,Type>, e: &'b Expr) -> Result<Type,
 type Frame = Vec<Instr>;
 type Environ = HashMap<Name, Mvalue>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Mvalue {
     Int(i64),
     Bool(bool),
@@ -221,7 +223,7 @@ impl fmt::Display for Mvalue {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Instr {
     Mult,
     Add,
@@ -454,15 +456,58 @@ fn compile(expr: Expr) -> Vec<Instr> {
         }
     }
 }
-
-
 ////////////// end compile /////////////
 
+////////// miniml.ml //////////////
+
+//[exec_cmd (ctx, env) cmd] executes the toplevel command [cmd] and
+// returns the new context-environment pair and a string representing the
+// result of evaluation.
+fn exec_cmd(ctx: &mut HashMap<Name, Type>, env: Environ, cmd: TopLevelCmd) -> Result<String, String> {
+    match cmd {
+        TopLevelCmd::Expr(e) => {
+            let ty = try!(type_of(ctx, &e));
+            let frm = compile(e);
+            let v = try!(run(frm, env));
+            Ok(format!("- : {} = {}", ty, v))
+        }
+        TopLevelCmd::Def(x, e) => {
+            let ty = try!(type_of(ctx, &e));
+            let frm = compile(e);
+            let v = try!(run(frm, env));
+            ctx.insert(x.clone(), ty.clone());
+            Ok(format!("{} : {} = {}", x, ty, v))
+        }
+    }
+}
+
+fn exec_cmds(ctx: &mut HashMap<Name, Type>, env: Environ, cmds: Vec<TopLevelCmd>) -> Result<String, String> {
+    let mut output: String = String::new();
+    for cmd in cmds.into_iter() {
+        let e2 = env.clone(); // YUCK! But I tried changing this to &Environ and chasing it through, then ran into lifetime issues...
+        let o = try!(exec_cmd(ctx, e2, cmd));
+        output = output + "\n";
+        output = output + &o;
+    }
+    Ok(output)
+}
+
+fn shell(ctx: HashMap<Name, Type>, env: Environ) {
+    println!("Welcome to MiniML.");
+    loop {
+        print!("MiniML> ");
+        if let Err(x) = io::stdout().flush() {
+            println!("could not flush: {}", x);
+        }
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).ok().expect("Could not read line.");
+    }
+}
+
+////////// end miniml ///////////
+
 fn main() {
-    let t: Type = Type::Arrow(
-                              Box::new(Type::Arrow(Box::new(Type::Int),
-                                                   Box::new(Type::Int))),
-                              Box::new(Type::Arrow(Box::new(Type::Bool),
-                                                   Box::new(Type::Bool))));
-    println!("type is: {}", t);
+    let mut ctx: HashMap<Name, Type> = HashMap::new();
+    let mut env: Environ = HashMap::new();
+    shell(ctx, env);
 }
