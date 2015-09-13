@@ -484,7 +484,7 @@ fn exec_cmds(ctx: &mut HashMap<Name, Type>, env: Environ, cmds: Vec<TopLevelCmd>
     Ok(output)
 }
 
-fn shell(mut ctx: HashMap<Name, Type>, env: Environ) {
+fn shell(ctx: &mut HashMap<Name, Type>, env: Environ) {
     println!("Welcome to MiniML.");
     loop {
         print!("MiniML> ");
@@ -494,7 +494,7 @@ fn shell(mut ctx: HashMap<Name, Type>, env: Environ) {
         let mut input = String::new();
         io::stdin().read_line(&mut input).ok().expect("Could not read line.");
         if let Ok(cmds) = parse(input) {
-            if let Ok(out) = exec_cmds(&mut ctx, env.clone(), cmds) { // Again with the clone?? Okay, I guess I'll figure out lifetimes..
+            if let Ok(out) = exec_cmds(ctx, env.clone(), cmds) { // Again with the clone?? Okay, I guess I'll figure out lifetimes..
                 println!("{}", out)
             }
         }
@@ -510,5 +510,5 @@ fn parse(input: String) -> Result<Vec<TopLevelCmd>, &'static str> {
 fn main() {
     let mut ctx: HashMap<Name, Type> = HashMap::new();
     let mut env: Environ = HashMap::new();
-    shell(ctx, env);
+    shell(&mut ctx, env);
 }
