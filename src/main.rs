@@ -366,10 +366,10 @@ fn exec(instr: Instr, frms: &mut Vec<Frame>, stack: &mut Vec<Mvalue>, envs: &mut
     }
 }
 
-fn run(frm: Frame, env: Environ) -> Result<Mvalue, String> {
+fn run(frm: Frame, env: &mut Environ) -> Result<Mvalue, String> {
     let mut frms: Vec<Frame> = vec![frm];
     let mut stack: Vec<Mvalue> = vec![];
-    let mut envs: Vec<Environ> = vec![env];
+    let mut envs: Vec<Environ> = vec![env.clone()];
 
     loop {
         if frms.len() == 0 && stack.len() == 1 {
@@ -455,7 +455,7 @@ fn compile(expr: Expr) -> Vec<Instr> {
 //[exec_cmd (ctx, env) cmd] executes the toplevel command [cmd] and
 // returns the new context-environment pair and a string representing the
 // result of evaluation.
-fn exec_cmd(ctx: &mut HashMap<Name, Type>, env: Environ, cmd: TopLevelCmd) -> Result<String, String> {
+fn exec_cmd(ctx: &mut HashMap<Name, Type>, env: &mut Environ, cmd: TopLevelCmd) -> Result<String, String> {
     match cmd {
         TopLevelCmd::Expr(e) => {
             let ty = try!(type_of(ctx, &e));
@@ -473,18 +473,17 @@ fn exec_cmd(ctx: &mut HashMap<Name, Type>, env: Environ, cmd: TopLevelCmd) -> Re
     }
 }
 
-fn exec_cmds(ctx: &mut HashMap<Name, Type>, env: Environ, cmds: Vec<TopLevelCmd>) -> Result<String, String> {
+fn exec_cmds(ctx: &mut HashMap<Name, Type>, env: &mut Environ, cmds: Vec<TopLevelCmd>) -> Result<String, String> {
     let mut output: String = String::new();
     for cmd in cmds.into_iter() {
-        let e2 = env.clone(); // YUCK! But I tried changing this to &Environ and chasing it through, then ran into lifetime issues...
-        let o = try!(exec_cmd(ctx, e2, cmd));
+        let o = try!(exec_cmd(ctx, env, cmd));
         output = output + "\n";
         output = output + &o;
     }
     Ok(output)
 }
 
-fn shell(ctx: &mut HashMap<Name, Type>, env: Environ) {
+fn shell(ctx: &mut HashMap<Name, Type>, env: &mut Environ) {
     println!("Welcome to MiniML.");
     loop {
         print!("MiniML> ");
@@ -494,7 +493,7 @@ fn shell(ctx: &mut HashMap<Name, Type>, env: Environ) {
         let mut input = String::new();
         io::stdin().read_line(&mut input).ok().expect("Could not read line.");
         if let Ok(cmds) = parse(input) {
-            if let Ok(out) = exec_cmds(ctx, env.clone(), cmds) { // Again with the clone?? Okay, I guess I'll figure out lifetimes..
+            if let Ok(out) = exec_cmds(ctx, env, cmds) {
                 println!("{}", out)
             }
         }
@@ -510,5 +509,5 @@ fn parse(input: String) -> Result<Vec<TopLevelCmd>, &'static str> {
 fn main() {
     let mut ctx: HashMap<Name, Type> = HashMap::new();
     let mut env: Environ = HashMap::new();
-    shell(&mut ctx, env);
+    shell(&mut ctx, &mut env);
 }
