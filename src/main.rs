@@ -136,14 +136,6 @@ enum TopLevelCmd {
     Def(Name, Expr)
 }
 
-/* [subst [(x1,e1);...;(xn;en)] e] replaces in expression [e] all
-   free occurrences of variables [x1], ..., [xn] with expressions
-   [e1], ..., [en], respectively. */
-
-fn subst() {
-    unimplemented!()
-}
-
 ////////// end syntax //////////////////
 
 /////////  type_check.ml ////////////////
@@ -492,7 +484,7 @@ fn exec_cmds(ctx: &mut HashMap<Name, Type>, env: Environ, cmds: Vec<TopLevelCmd>
     Ok(output)
 }
 
-fn shell(ctx: HashMap<Name, Type>, env: Environ) {
+fn shell(mut ctx: HashMap<Name, Type>, env: Environ) {
     println!("Welcome to MiniML.");
     loop {
         print!("MiniML> ");
@@ -501,7 +493,16 @@ fn shell(ctx: HashMap<Name, Type>, env: Environ) {
         }
         let mut input = String::new();
         io::stdin().read_line(&mut input).ok().expect("Could not read line.");
+        if let Ok(cmds) = parse(input) {
+            if let Ok(out) = exec_cmds(&mut ctx, env.clone(), cmds) { // Again with the clone?? Okay, I guess I'll figure out lifetimes..
+                println!("{}", out)
+            }
+        }
     }
+}
+
+fn parse(input: String) -> Result<Vec<TopLevelCmd>, &'static str> {
+    Ok(vec![TopLevelCmd::Expr(Expr::Int(5))])
 }
 
 ////////// end miniml ///////////
