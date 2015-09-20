@@ -1,0 +1,29 @@
+use std::str::FromStr;
+use ast::{Type, Expr, TopLevelCmd, Tok};
+
+grammar;
+
+pub Term: Expr = True;
+
+Int: Expr = <s:r"[0-9]+"> => Expr::Int(i64::from_str(s).unwrap());
+Tint: Type = "int" => Type::Int;
+Tbool: Type = "bool" => Type::Bool;
+True: Expr = "true" => Expr::Bool(true);
+False: Expr = "false" => Expr::Bool(false);
+
+Fun: Tok = "fun" => Tok::Fun;
+Is: Tok = "is" => Tok::Is;
+If: Tok = "if" => Tok::If;
+Then: Tok = "then" => Tok::Then;
+Else: Tok = "else" => Tok::Else;
+Let: Tok = "let" => Tok::Let;
+Semicolon2: Tok = ";;" => Tok::Semicolon2;
+Equal: Tok = "=" => Tok::Equal;
+Less: Tok = "<" => Tok::Less;
+Tarrow: Tok = "->" => Tok::Tarrow;
+Colon: Tok = ":" => Tok::Colon;
+Lparen: Tok = "(" => Tok::Lparen;
+Rparen: Tok = ")" => Tok::Rparen;
+Plus: Tok = "+" => Tok::Plus;
+Minus: Tok = "-" => Tok::Minus;
+Times: Tok = "*" => Tok::Times;

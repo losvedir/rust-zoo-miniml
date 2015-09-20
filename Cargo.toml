@@ -2,3 +2,10 @@
 name = "rust-zoo-miniml"
 version = "0.1.0"
 authors = ["Gabe Durazo <gabe@gabedurazo.com>"]
+build = "build.rs"
+
+[build-dependencies]
+lalrpop = "0.6.1"
+
+[dependencies]
+lalrpop-util = "0.6.1"
