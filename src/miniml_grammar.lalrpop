@@ -27,3 +27,4 @@ Rparen: Tok = ")" => Tok::Rparen;
 Plus: Tok = "+" => Tok::Plus;
 Minus: Tok = "-" => Tok::Minus;
 Times: Tok = "*" => Tok::Times;
+Var: Expr = <s:r"[a-z_]+"> => Expr::Var(s.to_string());
