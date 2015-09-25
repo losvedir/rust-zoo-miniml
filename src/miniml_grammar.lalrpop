@@ -26,10 +26,6 @@ Minus: Tok = "-" => Tok::Minus;
 Times: Tok = "*" => Tok::Times;
 Var: Expr = <s:r"[a-z_]+"> => Expr::Var(s.to_string());
 
-pub Expr: Expr = {
-    "unimplemented!" => Expr::Int(30)
-};
-
 pub Toplevel: Vec<TopLevelCmd> = {
     <Def> => vec![<>],
     <Def> ";;" => vec![<>]
@@ -39,29 +35,37 @@ Def: TopLevelCmd = {
     "unimplemented!" => TopLevelCmd::Expr(Expr::Var("foo".to_string()))
 };
 
-App: Expr = {
-    <app:App> <nonapp:Nonapp> => Expr::Apply(Box::new(app), Box::new(nonapp)),
-    <n1:Nonapp> <n2:Nonapp> => Expr::Apply(Box::new(n1), Box::new(n2))
+pub Bexpr: Box<Expr> = {
+    // Nonapp,
+    // App,
+    // Arith,
+    // Boolean
+    "unimplemented!" => Box::new(Expr::Int(3))
 };
 
-Nonapp: Expr = {
-    Var,
-    "true" => Expr::Bool(true),
-    "false" => Expr::Bool(false),
-    <Int> => Expr::Int(<>),
-    "(" <Expr> ")" => <>
+App: Box<Expr> = {
+    App Nonapp => Box::new(Expr::Apply(<>)),
+    Nonapp Nonapp => Box::new(Expr::Apply(<>))
 };
 
-Arith: Expr = {
-    "-" <Int> => Expr::Int(<>),
-    <e1:Expr> "+" <e2:Expr> => Expr::Plus(Box::new(e1), Box::new(e2)),
-    <e1:Expr> "-" <e2:Expr> => Expr::Minus(Box::new(e1), Box::new(e2)),
-    <e1:Expr> "*" <e2:Expr> => Expr::Times(Box::new(e1), Box::new(e2))
+Nonapp: Box<Expr> = {
+    Var => Box::new(<>),
+    "true" => Box::new(Expr::Bool(true)),
+    "false" => Box::new(Expr::Bool(false)),
+    Int => Box::new(Expr::Int(<>)),
+    "(" <Bexpr> ")" => <>
 };
 
-Boolean: Expr = {
-    <e1:Expr> "=" <e2:Expr> => Expr::Equal(Box::new(e1), Box::new(e2)),
-    <e1:Expr> "<" <e2:Expr> => Expr::Less(Box::new(e1), Box::new(e2))
+Arith: Box<Expr> = {
+    "-" <Int> => Box::new(Expr::Int(<>)),
+    <Bexpr> "+" <Bexpr> => Box::new(Expr::Plus(<>)),
+    <Bexpr> "-" <Bexpr> => Box::new(Expr::Minus(<>)),
+    <Bexpr> "*" <Bexpr> => Box::new(Expr::Times(<>))
+};
+
+Boolean: Box<Expr> = {
+    <Bexpr> "=" <Bexpr> => Box::new(Expr::Equal(<>)),
+    <Bexpr> "<" <Bexpr> => Box::new(Expr::Less(<>))
 };
 
 pub Ty: Type = {

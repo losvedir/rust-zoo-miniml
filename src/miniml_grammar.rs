@@ -5,18 +5,18 @@ use ast::{Type, Expr, TopLevelCmd, Tok};
 extern crate lalrpop_util as __lalrpop_util;
 use self::__lalrpop_util::ParseError as __ParseError;
 
-mod __parse__Expr {
+mod __parse__Bexpr {
     #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports)]
 
     use std::str::FromStr;
     use ast::{Type, Expr, TopLevelCmd, Tok};
     extern crate lalrpop_util as __lalrpop_util;
     use self::__lalrpop_util::ParseError as __ParseError;
-    pub fn parse_Expr<
+    pub fn parse_Bexpr<
         'input,
     >(
         input: &'input str,
-    ) -> Result<Expr, __ParseError<usize,(usize, &'input str),()>>
+    ) -> Result<Box<Expr>, __ParseError<usize,(usize, &'input str),()>>
     {
         let mut __tokens = super::__intern_token::__Matcher::new(input);
         let __lookahead = match __tokens.next() {
@@ -28,7 +28,7 @@ mod __parse__Expr {
             (_, Some(__lookahead), _) => {
                 Err(__ParseError::ExtraToken { token: __lookahead })
             }
-            (_, None, __Nonterminal::____Expr(__nt)) => {
+            (_, None, __Nonterminal::____Bexpr(__nt)) => {
                 Ok(__nt)
             }
             _ => unreachable!(),
@@ -37,14 +37,14 @@ mod __parse__Expr {
 
     #[allow(dead_code)]
     pub enum __Nonterminal<> {
-        App(Expr),
-        Arith(Expr),
-        Boolean(Expr),
+        App(Box<Expr>),
+        Arith(Box<Expr>),
+        Bexpr(Box<Expr>),
+        Boolean(Box<Expr>),
         Colon(Tok),
         Def(TopLevelCmd),
         Else(Tok),
         Equal(Tok),
-        Expr(Expr),
         False(Tok),
         Fun(Tok),
         If(Tok),
@@ -54,7 +54,7 @@ mod __parse__Expr {
         Let(Tok),
         Lparen(Tok),
         Minus(Tok),
-        Nonapp(Expr),
+        Nonapp(Box<Expr>),
         Plus(Tok),
         Rparen(Tok),
         Semicolon2(Tok),
@@ -68,18 +68,18 @@ mod __parse__Expr {
         Ty(Type),
         Ty1(Type),
         Var(Expr),
-        ____Expr(Expr),
+        ____Bexpr(Box<Expr>),
         ____Toplevel(Vec<TopLevelCmd>),
         ____Ty(Type),
     }
 
     // State 0
-    //   Expr = (*) "unimplemented!" [EOF]
-    //   __Expr = (*) Expr [EOF]
+    //   Bexpr = (*) "unimplemented!" [EOF]
+    //   __Bexpr = (*) Bexpr [EOF]
     //
     //   "unimplemented!" -> Shift(S2)
     //
-    //   Expr -> S1
+    //   Bexpr -> S1
     pub fn __state0<
         'input,
         __TOKENS: Iterator<Item=Result<(usize, (usize, &'input str), usize),__ParseError<usize,(usize, &'input str),()>>>,
@@ -107,7 +107,7 @@ mod __parse__Expr {
         loop {
             let (__lookbehind, __lookahead, __nt) = __result;
             match __nt {
-                __Nonterminal::Expr(__nt) => {
+                __Nonterminal::Bexpr(__nt) => {
                     let __sym0 = &mut Some(__nt);
                     __result = try!(__state1(input, __lookbehind, __tokens, __lookahead, __sym0));
                 }
@@ -119,9 +119,9 @@ mod __parse__Expr {
     }
 
     // State 1
-    //   __Expr = Expr (*) [EOF]
+    //   __Bexpr = Bexpr (*) [EOF]
     //
-    //   EOF -> Reduce(__Expr = Expr => Call(ActionFn(0));)
+    //   EOF -> Reduce(__Bexpr = Bexpr => Call(ActionFn(1));)
     //
     pub fn __state1<
         'input,
@@ -131,15 +131,15 @@ mod __parse__Expr {
         __lookbehind: Option<usize>,
         __tokens: &mut __TOKENS,
         __lookahead: Option<(usize, (usize, &'input str), usize)>,
-        __sym0: &mut Option<Expr>,
+        __sym0: &mut Option<Box<Expr>>,
     ) -> Result<(Option<usize>, Option<(usize, (usize, &'input str), usize)>, __Nonterminal<>), __ParseError<usize,(usize, &'input str),()>>
     {
         let mut __result: (Option<usize>, Option<(usize, (usize, &'input str), usize)>, __Nonterminal<>);
         match __lookahead {
             None => {
                 let __sym0 = __sym0.take().unwrap();
-                let __nt = super::__action0(input, __sym0);
-                return Ok((__lookbehind, __lookahead, __Nonterminal::____Expr(__nt)));
+                let __nt = super::__action1(input, __sym0);
+                return Ok((__lookbehind, __lookahead, __Nonterminal::____Bexpr(__nt)));
             }
             _ => {
                 return Err(__ParseError::UnrecognizedToken {
@@ -151,9 +151,9 @@ mod __parse__Expr {
     }
 
     // State 2
-    //   Expr = "unimplemented!" (*) [EOF]
+    //   Bexpr = "unimplemented!" (*) [EOF]
     //
-    //   EOF -> Reduce(Expr = "unimplemented!" => Call(ActionFn(25));)
+    //   EOF -> Reduce(Bexpr = "unimplemented!" => Call(ActionFn(28));)
     //
     pub fn __state2<
         'input,
@@ -174,8 +174,8 @@ mod __parse__Expr {
         match __lookahead {
             None => {
                 let __sym0 = __sym0.take().unwrap();
-                let __nt = super::__action25(input, __sym0);
-                return Ok((__lookbehind, __lookahead, __Nonterminal::Expr(__nt)));
+                let __nt = super::__action28(input, __sym0);
+                return Ok((__lookbehind, __lookahead, __Nonterminal::Bexpr(__nt)));
             }
             _ => {
                 return Err(__ParseError::UnrecognizedToken {
@@ -186,7 +186,7 @@ mod __parse__Expr {
         }
     }
 }
-pub use self::__parse__Expr::parse_Expr;
+pub use self::__parse__Bexpr::parse_Bexpr;
 
 mod __parse__Toplevel {
     #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports)]
@@ -220,14 +220,14 @@ mod __parse__Toplevel {
 
     #[allow(dead_code)]
     pub enum __Nonterminal<> {
-        App(Expr),
-        Arith(Expr),
-        Boolean(Expr),
+        App(Box<Expr>),
+        Arith(Box<Expr>),
+        Bexpr(Box<Expr>),
+        Boolean(Box<Expr>),
         Colon(Tok),
         Def(TopLevelCmd),
         Else(Tok),
         Equal(Tok),
-        Expr(Expr),
         False(Tok),
         Fun(Tok),
         If(Tok),
@@ -237,7 +237,7 @@ mod __parse__Toplevel {
         Let(Tok),
         Lparen(Tok),
         Minus(Tok),
-        Nonapp(Expr),
+        Nonapp(Box<Expr>),
         Plus(Tok),
         Rparen(Tok),
         Semicolon2(Tok),
@@ -251,7 +251,7 @@ mod __parse__Toplevel {
         Ty(Type),
         Ty1(Type),
         Var(Expr),
-        ____Expr(Expr),
+        ____Bexpr(Box<Expr>),
         ____Toplevel(Vec<TopLevelCmd>),
         ____Ty(Type),
     }
@@ -313,7 +313,7 @@ mod __parse__Toplevel {
     //   Toplevel = Def (*) [EOF]
     //   Toplevel = Def (*) ";;" [EOF]
     //
-    //   EOF -> Reduce(Toplevel = Def => Call(ActionFn(26));)
+    //   EOF -> Reduce(Toplevel = Def => Call(ActionFn(25));)
     //   ";;" -> Shift(S4)
     //
     pub fn __state1<
@@ -336,7 +336,7 @@ mod __parse__Toplevel {
             }
             None => {
                 let __sym0 = __sym0.take().unwrap();
-                let __nt = super::__action26(input, __sym0);
+                let __nt = super::__action25(input, __sym0);
                 return Ok((__lookbehind, __lookahead, __Nonterminal::Toplevel(__nt)));
             }
             _ => {
@@ -352,7 +352,7 @@ mod __parse__Toplevel {
     // State 2
     //   __Toplevel = Toplevel (*) [EOF]
     //
-    //   EOF -> Reduce(__Toplevel = Toplevel => Call(ActionFn(1));)
+    //   EOF -> Reduce(__Toplevel = Toplevel => Call(ActionFn(0));)
     //
     pub fn __state2<
         'input,
@@ -369,7 +369,7 @@ mod __parse__Toplevel {
         match __lookahead {
             None => {
                 let __sym0 = __sym0.take().unwrap();
-                let __nt = super::__action1(input, __sym0);
+                let __nt = super::__action0(input, __sym0);
                 return Ok((__lookbehind, __lookahead, __Nonterminal::____Toplevel(__nt)));
             }
             _ => {
@@ -385,8 +385,8 @@ mod __parse__Toplevel {
     //   Def = "unimplemented!" (*) [EOF]
     //   Def = "unimplemented!" (*) [";;"]
     //
-    //   EOF -> Reduce(Def = "unimplemented!" => Call(ActionFn(28));)
-    //   ";;" -> Reduce(Def = "unimplemented!" => Call(ActionFn(28));)
+    //   EOF -> Reduce(Def = "unimplemented!" => Call(ActionFn(27));)
+    //   ";;" -> Reduce(Def = "unimplemented!" => Call(ActionFn(27));)
     //
     pub fn __state3<
         'input,
@@ -408,7 +408,7 @@ mod __parse__Toplevel {
             None |
             Some((_, (7, _), _)) => {
                 let __sym0 = __sym0.take().unwrap();
-                let __nt = super::__action28(input, __sym0);
+                let __nt = super::__action27(input, __sym0);
                 return Ok((__lookbehind, __lookahead, __Nonterminal::Def(__nt)));
             }
             _ => {
@@ -423,7 +423,7 @@ mod __parse__Toplevel {
     // State 4
     //   Toplevel = Def ";;" (*) [EOF]
     //
-    //   EOF -> Reduce(Toplevel = Def, ";;" => Call(ActionFn(27));)
+    //   EOF -> Reduce(Toplevel = Def, ";;" => Call(ActionFn(26));)
     //
     pub fn __state4<
         'input,
@@ -446,7 +446,7 @@ mod __parse__Toplevel {
             None => {
                 let __sym0 = __sym0.take().unwrap();
                 let __sym1 = __sym1.take().unwrap();
-                let __nt = super::__action27(input, __sym0, __sym1);
+                let __nt = super::__action26(input, __sym0, __sym1);
                 return Ok((__lookbehind, __lookahead, __Nonterminal::Toplevel(__nt)));
             }
             _ => {
@@ -492,14 +492,14 @@ mod __parse__Ty {
 
     #[allow(dead_code)]
     pub enum __Nonterminal<> {
-        App(Expr),
-        Arith(Expr),
-        Boolean(Expr),
+        App(Box<Expr>),
+        Arith(Box<Expr>),
+        Bexpr(Box<Expr>),
+        Boolean(Box<Expr>),
         Colon(Tok),
         Def(TopLevelCmd),
         Else(Tok),
         Equal(Tok),
-        Expr(Expr),
         False(Tok),
         Fun(Tok),
         If(Tok),
@@ -509,7 +509,7 @@ mod __parse__Ty {
         Let(Tok),
         Lparen(Tok),
         Minus(Tok),
-        Nonapp(Expr),
+        Nonapp(Box<Expr>),
         Plus(Tok),
         Rparen(Tok),
         Semicolon2(Tok),
@@ -523,7 +523,7 @@ mod __parse__Ty {
         Ty(Type),
         Ty1(Type),
         Var(Expr),
-        ____Expr(Expr),
+        ____Bexpr(Box<Expr>),
         ____Toplevel(Vec<TopLevelCmd>),
         ____Ty(Type),
     }
@@ -8585,8 +8585,8 @@ pub fn __action0<
     'input,
 >(
     input: &'input str,
-    __0: Expr,
-) -> Expr
+    __0: Vec<TopLevelCmd>,
+) -> Vec<TopLevelCmd>
 {
     (__0)
 }
@@ -8595,8 +8595,8 @@ pub fn __action1<
     'input,
 >(
     input: &'input str,
-    __0: Vec<TopLevelCmd>,
-) -> Vec<TopLevelCmd>
+    __0: Box<Expr>,
+) -> Box<Expr>
 {
     (__0)
 }
@@ -8835,10 +8835,10 @@ pub fn __action25<
     'input,
 >(
     input: &'input str,
-    __0: &'input str,
-) -> Expr
+    __0: TopLevelCmd,
+) -> Vec<TopLevelCmd>
 {
-    Expr::Int(30)
+    vec![__0]
 }
 
 pub fn __action26<
@@ -8846,6 +8846,7 @@ pub fn __action26<
 >(
     input: &'input str,
     __0: TopLevelCmd,
+    _: &'input str,
 ) -> Vec<TopLevelCmd>
 {
     vec![__0]
@@ -8855,11 +8856,10 @@ pub fn __action27<
     'input,
 >(
     input: &'input str,
-    __0: TopLevelCmd,
-    _: &'input str,
-) -> Vec<TopLevelCmd>
+    __0: &'input str,
+) -> TopLevelCmd
 {
-    vec![__0]
+    TopLevelCmd::Expr(Expr::Var("foo".to_string()))
 }
 
 pub fn __action28<
@@ -8867,31 +8867,31 @@ pub fn __action28<
 >(
     input: &'input str,
     __0: &'input str,
-) -> TopLevelCmd
+) -> Box<Expr>
 {
-    TopLevelCmd::Expr(Expr::Var("foo".to_string()))
+    Box::new(Expr::Int(3))
 }
 
 pub fn __action29<
     'input,
 >(
     input: &'input str,
-    app: Expr,
-    nonapp: Expr,
-) -> Expr
+    __0: Box<Expr>,
+    __1: Box<Expr>,
+) -> Box<Expr>
 {
-    Expr::Apply(Box::new(app), Box::new(nonapp))
+    Box::new(Expr::Apply(__0, __1))
 }
 
 pub fn __action30<
     'input,
 >(
     input: &'input str,
-    n1: Expr,
-    n2: Expr,
-) -> Expr
+    __0: Box<Expr>,
+    __1: Box<Expr>,
+) -> Box<Expr>
 {
-    Expr::Apply(Box::new(n1), Box::new(n2))
+    Box::new(Expr::Apply(__0, __1))
 }
 
 pub fn __action31<
@@ -8899,9 +8899,9 @@ pub fn __action31<
 >(
     input: &'input str,
     __0: Expr,
-) -> Expr
+) -> Box<Expr>
 {
-    (__0)
+    Box::new(__0)
 }
 
 pub fn __action32<
@@ -8909,9 +8909,9 @@ pub fn __action32<
 >(
     input: &'input str,
     __0: &'input str,
-) -> Expr
+) -> Box<Expr>
 {
-    Expr::Bool(true)
+    Box::new(Expr::Bool(true))
 }
 
 pub fn __action33<
@@ -8919,9 +8919,9 @@ pub fn __action33<
 >(
     input: &'input str,
     __0: &'input str,
-) -> Expr
+) -> Box<Expr>
 {
-    Expr::Bool(false)
+    Box::new(Expr::Bool(false))
 }
 
 pub fn __action34<
@@ -8929,9 +8929,9 @@ pub fn __action34<
 >(
     input: &'input str,
     __0: i64,
-) -> Expr
+) -> Box<Expr>
 {
-    Expr::Int(__0)
+    Box::new(Expr::Int(__0))
 }
 
 pub fn __action35<
@@ -8939,9 +8939,9 @@ pub fn __action35<
 >(
     input: &'input str,
     _: &'input str,
-    __0: Expr,
+    __0: Box<Expr>,
     _: &'input str,
-) -> Expr
+) -> Box<Expr>
 {
     __0
 }
@@ -8952,69 +8952,69 @@ pub fn __action36<
     input: &'input str,
     _: &'input str,
     __0: i64,
-) -> Expr
+) -> Box<Expr>
 {
-    Expr::Int(__0)
+    Box::new(Expr::Int(__0))
 }
 
 pub fn __action37<
     'input,
 >(
     input: &'input str,
-    e1: Expr,
+    __0: Box<Expr>,
     _: &'input str,
-    e2: Expr,
-) -> Expr
+    __1: Box<Expr>,
+) -> Box<Expr>
 {
-    Expr::Plus(Box::new(e1), Box::new(e2))
+    Box::new(Expr::Plus(__0, __1))
 }
 
 pub fn __action38<
     'input,
 >(
     input: &'input str,
-    e1: Expr,
+    __0: Box<Expr>,
     _: &'input str,
-    e2: Expr,
-) -> Expr
+    __1: Box<Expr>,
+) -> Box<Expr>
 {
-    Expr::Minus(Box::new(e1), Box::new(e2))
+    Box::new(Expr::Minus(__0, __1))
 }
 
 pub fn __action39<
     'input,
 >(
     input: &'input str,
-    e1: Expr,
+    __0: Box<Expr>,
     _: &'input str,
-    e2: Expr,
-) -> Expr
+    __1: Box<Expr>,
+) -> Box<Expr>
 {
-    Expr::Times(Box::new(e1), Box::new(e2))
+    Box::new(Expr::Times(__0, __1))
 }
 
 pub fn __action40<
     'input,
 >(
     input: &'input str,
-    e1: Expr,
+    __0: Box<Expr>,
     _: &'input str,
-    e2: Expr,
-) -> Expr
+    __1: Box<Expr>,
+) -> Box<Expr>
 {
-    Expr::Equal(Box::new(e1), Box::new(e2))
+    Box::new(Expr::Equal(__0, __1))
 }
 
 pub fn __action41<
     'input,
 >(
     input: &'input str,
-    e1: Expr,
+    __0: Box<Expr>,
     _: &'input str,
-    e2: Expr,
-) -> Expr
+    __1: Box<Expr>,
+) -> Box<Expr>
 {
-    Expr::Less(Box::new(e1), Box::new(e2))
+    Box::new(Expr::Less(__0, __1))
 }
 
 pub fn __action42<
