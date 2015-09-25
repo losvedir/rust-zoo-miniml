@@ -138,6 +138,11 @@ pub enum TopLevelCmd {
 
 
 pub enum Tok {
+    Int(i32),
+    Tint,
+    Tbool,
+    True,
+    False,
     Fun,
     Is,
     If,
@@ -154,4 +159,5 @@ pub enum Tok {
     Plus,
     Minus,
     Times,
+    Var(String)
 }

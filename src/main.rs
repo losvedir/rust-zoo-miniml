@@ -383,7 +383,13 @@ fn main() {
     shell(&mut ctx, &mut env);
 }
 
+
+// #[test]
+// fn test_parse_type() {
+//     println!("{:?}", miniml_grammar::parse_Type("int -> int"));
+// }
+
 #[test]
-fn test_grammar() {
-    assert!(miniml_grammar::parse_Term("22").unwrap() == 22);
+fn calculator1() {
+    assert!(miniml_grammar::parse_Term("22").is_ok());
 }

@@ -3,14 +3,11 @@ use ast::{Type, Expr, TopLevelCmd, Tok};
 
 grammar;
 
-pub Term: Expr = True;
-
-Int: Expr = <s:r"[0-9]+"> => Expr::Int(i64::from_str(s).unwrap());
-Tint: Type = "int" => Type::Int;
-Tbool: Type = "bool" => Type::Bool;
-True: Expr = "true" => Expr::Bool(true);
-False: Expr = "false" => Expr::Bool(false);
-
+Int: i64 = <s:r"[0-9]+"> => i64::from_str(s).unwrap();
+Tint: Tok = "int" => Tok::Tint;
+Tbool: Tok = "bool" => Tok::Tbool;
+True: Tok = "true" => Tok::True;
+False: Tok = "false" => Tok::False;
 Fun: Tok = "fun" => Tok::Fun;
 Is: Tok = "is" => Tok::Is;
 If: Tok = "if" => Tok::If;
@@ -28,3 +25,53 @@ Plus: Tok = "+" => Tok::Plus;
 Minus: Tok = "-" => Tok::Minus;
 Times: Tok = "*" => Tok::Times;
 Var: Expr = <s:r"[a-z_]+"> => Expr::Var(s.to_string());
+
+pub Expr: Expr = {
+    "unimplemented!" => Expr::Int(30)
+};
+
+pub Toplevel: Vec<TopLevelCmd> = {
+    <Def> => vec![<>],
+    <Def> ";;" => vec![<>]
+};
+
+Def: TopLevelCmd = {
+    "unimplemented!" => TopLevelCmd::Expr(Expr::Var("foo".to_string()))
+};
+
+App: Expr = {
+    <app:App> <nonapp:Nonapp> => Expr::Apply(Box::new(app), Box::new(nonapp)),
+    <n1:Nonapp> <n2:Nonapp> => Expr::Apply(Box::new(n1), Box::new(n2))
+};
+
+Nonapp: Expr = {
+    Var,
+    "true" => Expr::Bool(true),
+    "false" => Expr::Bool(false),
+    <Int> => Expr::Int(<>),
+    "(" <Expr> ")" => <>
+};
+
+Arith: Expr = {
+    "-" <Int> => Expr::Int(<>),
+    <e1:Expr> "+" <e2:Expr> => Expr::Plus(Box::new(e1), Box::new(e2)),
+    <e1:Expr> "-" <e2:Expr> => Expr::Minus(Box::new(e1), Box::new(e2)),
+    <e1:Expr> "*" <e2:Expr> => Expr::Times(Box::new(e1), Box::new(e2))
+};
+
+Boolean: Expr = {
+    <e1:Expr> "=" <e2:Expr> => Expr::Equal(Box::new(e1), Box::new(e2)),
+    <e1:Expr> "<" <e2:Expr> => Expr::Less(Box::new(e1), Box::new(e2))
+};
+
+pub Ty: Type = {
+    Ty1,
+    <t1:Ty1> "->" <t2:Ty1> => Type::Arrow(Box::new(t1), Box::new(t2))
+};
+
+Ty1: Type = {
+    "int" => Type::Int,
+    "bool" => Type::Bool,
+    "(" <Ty> ")"
+};
+
