@@ -1,41 +1,37 @@
 use std::str::FromStr;
-use ast::{Type, Expr, TopLevelCmd, Tok};
+use ast::{Type, Expr, TopLevelCmd};
 
 grammar;
 
 Int: i64 = <s:r"[0-9]+"> => i64::from_str(s).unwrap();
-Tint: Tok = "int" => Tok::Tint;
-Tbool: Tok = "bool" => Tok::Tbool;
-True: Tok = "true" => Tok::True;
-False: Tok = "false" => Tok::False;
-Fun: Tok = "fun" => Tok::Fun;
-Is: Tok = "is" => Tok::Is;
-If: Tok = "if" => Tok::If;
-Then: Tok = "then" => Tok::Then;
-Else: Tok = "else" => Tok::Else;
-Let: Tok = "let" => Tok::Let;
-Semicolon2: Tok = ";;" => Tok::Semicolon2;
-Equal: Tok = "=" => Tok::Equal;
-Less: Tok = "<" => Tok::Less;
-Tarrow: Tok = "->" => Tok::Tarrow;
-Colon: Tok = ":" => Tok::Colon;
-Lparen: Tok = "(" => Tok::Lparen;
-Rparen: Tok = ")" => Tok::Rparen;
-Plus: Tok = "+" => Tok::Plus;
-Minus: Tok = "-" => Tok::Minus;
-Times: Tok = "*" => Tok::Times;
 Var: String = <s:r"[a-z_]+"> => s.to_string();
 
 pub Toplevel: Vec<TopLevelCmd> = {
-    <Def> => vec![<>],
-    <Def> ";;" => vec![<>]
+    Def => vec![<>],
+    <Def> ";;" => vec![<>],
+    Bexpr => vec![TopLevelCmd::Expr(*<>)],
+    <Bexpr> ";;" => vec![TopLevelCmd::Expr(*<>)],
+
+    // figure out how to improve this. Right now it re-extends every time we
+    // parse a new def or expr. better would be t.push(d), I think, but
+    // t is immutable. <mut t: Toplevel> doesn't work, though.
+    <d:Def> ";;" <t:Toplevel> => {
+        let mut new_t = vec![d];
+        new_t.extend(t);
+        new_t
+    },
+    <e:Bexpr> ";;" <t:Toplevel> => {
+        let mut new_t = vec![TopLevelCmd::Expr(*e)];
+        new_t.extend(t);
+        new_t
+    }
 };
 
 Def: TopLevelCmd = {
     "let" <v:Var> "=" <b:Bexpr> => TopLevelCmd::Def(v, *b)
 };
 
-pub Bexpr: Box<Expr> = {
+Bexpr: Box<Expr> = {
     Nonapp,
     App,
     Arith,
@@ -73,7 +69,7 @@ Boolean: Box<Expr> = {
     <Bexpr1> "<" <Bexpr> => Box::new(Expr::Less(<>))
 };
 
-pub Ty: Type = {
+Ty: Type = {
     Ty1,
     <t1:Ty1> "->" <t2:Ty1> => Type::Arrow(Box::new(t1), Box::new(t2))
 };

@@ -135,29 +135,3 @@ pub enum TopLevelCmd {
 }
 
 ////////// end syntax //////////////////
-
-
-pub enum Tok {
-    Int(i32),
-    Tint,
-    Tbool,
-    True,
-    False,
-    Fun,
-    Is,
-    If,
-    Then,
-    Else,
-    Let,
-    Semicolon2,
-    Equal,
-    Less,
-    Tarrow,
-    Colon,
-    Lparen,
-    Rparen,
-    Plus,
-    Minus,
-    Times,
-    Var(String)
-}
