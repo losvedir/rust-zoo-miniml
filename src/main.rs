@@ -371,8 +371,14 @@ fn shell(ctx: &mut HashMap<Name, Type>, env: &mut Environ) {
     }
 }
 
-fn parse(input: String) -> Result<Vec<TopLevelCmd>, &'static str> {
-    Ok(vec![TopLevelCmd::Expr(Expr::Int(5))])
+fn parse(input: String) -> Result<Vec<TopLevelCmd>, ()> {
+    match miniml_grammar::parse_Toplevel(&input) {
+        Ok(ast) => Ok(ast),
+        Err(err) => {
+            println!("Parse Error: {:?}", err);
+            Err(())
+        }
+    }
 }
 
 ////////// end miniml ///////////
