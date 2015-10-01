@@ -339,6 +339,7 @@ fn exec_cmd(ctx: &mut HashMap<Name, Type>, env: &mut Environ, cmd: TopLevelCmd) 
             let frm = compile(e);
             let v = try!(run(frm, env));
             ctx.insert(x.clone(), ty.clone());
+            env.insert(x.clone(), v.clone());
             Ok(format!("{} : {} = {}", x, ty, v))
         }
     }
@@ -363,9 +364,11 @@ fn shell(ctx: &mut HashMap<Name, Type>, env: &mut Environ) {
         }
         let mut input = String::new();
         io::stdin().read_line(&mut input).ok().expect("Could not read line.");
+
         if let Ok(cmds) = parse(input) {
-            if let Ok(out) = exec_cmds(ctx, env, cmds) {
-                println!("{}", out)
+            match exec_cmds(ctx, env, cmds) {
+                Ok(out) => println!("{}", out),
+                Err(err) => println!("{}", err)
             }
         }
     }
